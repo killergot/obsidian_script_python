@@ -1,3 +1,6 @@
+main_file_path : str = 'R:\myFolder\тест.md'
+
+
 file_extensions : tuple[str,...]= (
     '.txt',     # Текстовые файлы
     '.md',      # md-файлы

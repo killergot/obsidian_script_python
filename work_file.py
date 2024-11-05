@@ -2,12 +2,11 @@ import os
 import shutil
 import re
 
-from config import file_extensions,folder_path
+from config import file_extensions,main_file_path
 
 class FileHandler:
     """Класс для работы с файлами"""
     def __init__(self):
-        self.folder_path : str = folder_path
         self.file_extensions : list[str] = file_extensions
 
     def read_file(self, path : str) -> str | None:
@@ -23,11 +22,12 @@ class FileHandler:
         """Проверка того, существует ли файл"""
         if not test.endswith(self.file_extensions):
             test += '.md'
-        for directory in self.folder_path:
-            if os.path.exists(test):
-                return test
-            elif os.path.exists(os.path.join(directory, test)):
-                return os.path.join(directory, test)
+        if os.path.exists(test):
+            return test
+        for root, dirs, files in os.walk(main_file_path): 
+            if root.rfind('.git') == -1 and root.rfind('.obsidian') == -1:  # убираем проверку технических папок
+                if (os.path.exists(os.path.join(root,test))):
+                    return os.path.join(root[len(main_file_path)+1:],test)
         return None
 
 

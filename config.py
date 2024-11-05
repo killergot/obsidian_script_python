@@ -1,4 +1,4 @@
-main_file_path : str = 'R:\myFolder\тест.md'
+main_file_path : str = 'R:\myFolder'
 
 
 file_extensions : tuple[str,...]= (
@@ -33,10 +33,3 @@ file_extensions : tuple[str,...]= (
     '.mkv',     # MKV видеофайлы
     '.dll',     # Библиотеки динамической компоновки
 )
-
-folder_path : list[str] = [
-    'files',
-    'daily',
-    'Excalidraw',
-    'templates'
-]

@@ -3,6 +3,7 @@ import shutil
 import re
 
 from config import file_extensions,main_file_path
+from decor import except_catch
 
 class FileHandler:
     """Класс для работы с файлами"""
@@ -45,3 +46,21 @@ class FileHandler:
             # Извлекаем только непустые группы (т.е. либо из [[]], либо из ())
             results.append(match[0] or match[2] or match[3])
         return self.refactor_path_files(results)
+
+
+    
+    @except_catch
+    def copy_del_files(self,file_list : list[str], dst_path : str) -> None:  
+        """Копирует все файлы в списке в dst_path по таким-же путям как и в исходном
+        Если установлен флаг удаления, то так-же удаляет все файлы из сходного репозитория"""
+        # Проверка того, существует ли папка dst_path
+        if not os.path.exists(dst_path) and not os.path.isfile(dst_path):
+            print('Данной папки не существует')
+            return 
+
+        print('sdfa')
+
+
+        # Цикл, в котором будем проходиться по всем файлам
+        for i in file_list:
+            pass

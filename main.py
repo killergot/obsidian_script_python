@@ -1,9 +1,10 @@
 import sys
 from work_file import FileHandler,os
-
 from config import main_file_path
+from decor import except_catch
 
-def rec_find_links(file_path,links,fileHandler : FileHandler):
+@except_catch
+def rec_find_links(file_path : str,links : list[str],fileHandler : FileHandler) -> None:
     content: str | None = fileHandler.read_file(file_path)
     if content == None:
         print(file_path + ' wrong in name file')
@@ -14,6 +15,15 @@ def rec_find_links(file_path,links,fileHandler : FileHandler):
     for i in new_links.difference(old_links):
         if i.endswith('.md'):
             rec_find_links(i,links,fileHandler)
+
+
+@except_catch
+def filter_file_list(file_list : list[str], black_list_file : list[str] | None) -> None:
+    """Чистит входной лист файлов file_list от файлов в списке black_list_file"""
+    pass
+
+
+
 
 def main(*argv) -> None:
     # file_path : str = argv[1]
@@ -26,6 +36,8 @@ def main(*argv) -> None:
     rec_find_links(file_path,links,fileHandler) # Тут, наверное, плохо, что функция меняет список, который принимает
     # Возможно стоит сделать ее чистой, и представить данный список в виде возвращаемого значения
     print(links)
+    dst = r'C:\Users\max\Desktop\Тех Защита Информации\1'
+    fileHandler.copy_del_files(links,dst) 
 
 if __name__ == '__main__':
     main(*sys.argv)

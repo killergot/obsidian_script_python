@@ -1,6 +1,7 @@
 from functools import wraps
+from typing import Callable
 
-def except_catch(method):
+def except_catch(method : Callable) -> Callable:
     '''Простой декоратор для отлавливания ошибок, что-бы сама программа не падала'''
     @wraps(method)
     def wrapper(self, *args, **kwargs):

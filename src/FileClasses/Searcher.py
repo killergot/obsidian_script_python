@@ -1,8 +1,8 @@
 import os
 import re
 
-from FileClasses.decor import except_catch
-from FileClasses.DirectoryWorker import DirectoryWorker
+from src.FileClasses.decor import except_catch
+from src.FileClasses.DirectoryWorker import DirectoryWorker
 
 class SearcherAllFiles:
     """Класс для поиска всех подфайлов"""

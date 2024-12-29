@@ -1,5 +1,5 @@
 import sys
-from FileClasses.MainActivity import MainActivity
+from src.FileClasses.MainActivity import MainActivity
 
 if __name__ == '__main__':
     MainActivity(sys.argv)

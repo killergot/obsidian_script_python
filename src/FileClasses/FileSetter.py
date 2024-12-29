@@ -2,7 +2,7 @@ import shutil
 import os
 from operator import index
 
-from FileClasses.decor import except_catch
+from src.FileClasses.decor import except_catch
 
 
 class FileSetter:

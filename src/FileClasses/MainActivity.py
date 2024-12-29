@@ -1,5 +1,5 @@
-from FileClasses.Searcher import SearcherAllFiles,os
-from FileClasses.FileSetter import FileSetter
+from src.FileClasses.Searcher import SearcherAllFiles,os
+from src.FileClasses.FileSetter import FileSetter
 class MainActivity:
     help = """
     Можно скопировать или перенести файл и все его подфайлы в другое место.

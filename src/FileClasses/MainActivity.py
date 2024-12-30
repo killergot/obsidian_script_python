@@ -5,6 +5,10 @@ from src.FileClasses.FileSetter import FileSetter
 class MainActivity:
     help = """
     Можно скопировать или перенести файл и все его подфайлы в другое место.
+    Рассматриваются 3 вида ссылок в obsidian:
+            1 - [[link]]
+            2 - [text](link)
+            3 - [text](<link is separated by a space>)
     flags:
     -s/--src <path> - Главный файл
     --dst <path> - Целевая папка
@@ -33,7 +37,6 @@ class MainActivity:
                     self.folder_flag = True
             if getattr(self, 'src', None) is None or getattr(self, 'dst', None) is None:
                 print(self.help)
-                print(args)
             else:
                 self.main()
 

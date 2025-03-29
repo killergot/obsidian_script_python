@@ -1,5 +1,8 @@
 from functools import wraps
 from typing import Callable
+import logging
+
+log = logging.getLogger(__name__)
 
 def except_catch(method : Callable) -> Callable:
     '''Простой декоратор для отлавливания ошибок, что-бы сама программа не падала'''
@@ -9,7 +12,6 @@ def except_catch(method : Callable) -> Callable:
             result = method(self, *args, **kwargs)
             return result
         except Exception as e:
-            print(f"Что-то пошло не так при исполнении {method.__name__}") 
-            print(f'Вызвалась ошибка: {e}')
+            log.exception(f"Что-то пошло не так при исполнении {method.__name__}")
             return None
     return wrapper

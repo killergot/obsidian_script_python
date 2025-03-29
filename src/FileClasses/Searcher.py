@@ -3,6 +3,9 @@ import re
 
 from src.FileClasses.decor import except_catch
 from src.FileClasses.DirectoryWorker import DirectoryWorker
+import logging
+
+log = logging.getLogger(__name__)
 
 class SearcherAllFiles:
     """Класс для поиска всех подфайлов"""
@@ -42,8 +45,9 @@ class SearcherAllFiles:
     def searchIn(self,file_path) -> set[str]:
         res = set()
         self.main_file_path = file_path[:file_path.rfind('\\')]
-        DirectoryWorker.pushd(self.main_file_path,log=True)
+        DirectoryWorker.pushd(self.main_file_path)
         self.rec_find_links(file_path, res)
+        log.debug(f'{file_path = }')
         res.add(file_path[file_path.rfind('\\')+1:])
         return res
 
@@ -92,9 +96,16 @@ class SearcherAllFiles:
 
     @except_catch
     def rec_find_links(self,file_path: str, links: set[str]) -> None:
+        '''
+        Recursive search linsks in files
+        - MB we need add 1 more param for bloc deep recursion
+        :param file_path:
+        :param links:
+        :return:
+        '''
         content: str | None = self.read_file(file_path)
         if content == None:
-            print(file_path + ' wrong in name file')
+            log.error(file_path + ' wrong in name file')
             exit(1)
         old_links = set(links)  # костыль для пересечения в цикл, чтб не попасть в рекурсию
         new_links = set(self.find_all_links(content))

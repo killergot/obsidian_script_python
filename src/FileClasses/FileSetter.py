@@ -41,7 +41,7 @@ class FileSetter:
         :return:
         """
         if not os.path.exists(dst_path) and not os.path.isfile(dst_path):
-            print('Папки назначения не существует, создайте её')
+            print('Папки назначения не существует, создайте её\n')
             return
 
         for i in file_list:

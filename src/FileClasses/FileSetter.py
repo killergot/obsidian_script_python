@@ -1,7 +1,7 @@
 import shutil
 import os
-from operator import index
 import logging
+from pathlib import Path
 
 from src.FileClasses.decor import except_catch
 
@@ -12,22 +12,19 @@ class FileSetter:
     """
     Класс для переноса или копирования файлов из списка текущей рабочей директории куда либо
     """
+
     @staticmethod
-    def make_dirs(src_path: str, dst_path: str) -> str:
+    def new_make_dirs(src_path: str, dst_path: str) -> str:
         """
         Функция для создания папок внутри папки назначения
         :param src_path: Начальный путь файла
         :param dst_path: Целевая папка
-        :param log: Логирование
         """
-        _index = src_path.rfind('\\')
-        new_path = src_path[:src_path.rfind('\\')]
-        if _index != -1:
-            if log:
-                log.debug(f'Создается {new_path}')
-            os.makedirs(dst_path + '\\'+ new_path, exist_ok=True)
-            return dst_path + '\\'+new_path
-        return dst_path
+        path = Path(src_path)
+        if path.parent != Path('.'):
+            log.debug(f'Создается {path.parent}')
+            (Path(dst_path) / path.parent).mkdir(parents=True, exist_ok=True)
+        return str(Path(dst_path) / path)
 
     @classmethod
     @except_catch
@@ -51,7 +48,7 @@ class FileSetter:
         for i in file_list:
             new_dst_path : str = dst_path
             if folder_flag:
-                new_dst_path = cls.make_dirs(i, dst_path)
+                new_dst_path = cls.new_make_dirs(i, dst_path)
 
             if not del_flag:
                 shutil.copy2(i, new_dst_path)

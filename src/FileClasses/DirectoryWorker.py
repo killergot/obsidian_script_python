@@ -1,5 +1,6 @@
 import os
 import logging
+from pathlib import Path
 
 log = logging.getLogger(__name__)
 
@@ -7,7 +8,7 @@ class DirectoryWorker:
     directory_stack = []
 
     @classmethod
-    def pushd(cls,path):
+    def pushd(cls,path: str | Path):
         # Сохраняем текущую директорию в стек
         cls.directory_stack.append(os.getcwd())
         # Переходим в новую директорию

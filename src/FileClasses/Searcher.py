@@ -1,5 +1,7 @@
 import os
 import re
+from pathlib import Path
+from typing import Optional
 
 from src.FileClasses.decor import except_catch
 from src.FileClasses.DirectoryWorker import DirectoryWorker
@@ -42,13 +44,22 @@ class SearcherAllFiles:
         '.dll',  # Библиотеки динамической компоновки
     )
 
-    def searchIn(self,file_path) -> set[str]:
+    def searchIn(self,file_path: Path, main_path : Optional[str|Path]= None) -> set[str]:
+        """
+        Главная функция для поиска всех подфайлов
+        :param file_path: пусть к главному файлу
+        :param main_path: Путь к главной папке
+        :return:
+        """
         res = set()
-        self.main_file_path = file_path[:file_path.rfind('\\')]
+        if main_path is None:
+            self.main_file_path = file_path.parent
+        else:
+            self.main_file_path = main_path
         DirectoryWorker.pushd(self.main_file_path)
         self.rec_find_links(file_path, res)
         log.debug(f'{file_path = }')
-        res.add(file_path[file_path.rfind('\\')+1:])
+        res.add(file_path.name)
         return res
 
     def read_file(self, path : str) -> str | None:
@@ -72,10 +83,12 @@ class SearcherAllFiles:
             test += '.md'
         if os.path.exists(test):
             return test
-        for root, dirs, files in os.walk(self.main_file_path):
+        for root, _, _ in os.walk(self.main_file_path):
             if root.rfind('.git') == -1 and root.rfind('.obsidian') == -1:  # убираем проверку технических папок
-                if (os.path.exists(os.path.join(root,test))):
-                    return os.path.join(root[len(self.main_file_path)+1:],test)
+                temp = Path(root).joinpath(test)
+                if temp.exists():
+                    log.debug(temp.relative_to(self.main_file_path))
+                    return str(temp.relative_to(self.main_file_path))
         return None
 
 
@@ -104,7 +117,7 @@ class SearcherAllFiles:
         :return:
         '''
         content: str | None = self.read_file(file_path)
-        if content == None:
+        if content is None:
             log.error(file_path + ' wrong in name file')
             exit(1)
         old_links = set(links)  # костыль для пересечения в цикл, чтб не попасть в рекурсию

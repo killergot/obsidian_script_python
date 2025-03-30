@@ -37,10 +37,14 @@ if __name__ == '__main__':
                         help=LEXICON_RU['--folder'], action='store_true')
     parser.add_argument('--verbose',
                         help=LEXICON_RU['--verbose'], action='store_true')
+    parser.add_argument('--main_path',
+                        help=LEXICON_RU['--main_path'], default=None)
     args = parser.parse_args()
 
+
+
     searcher = SearcherAllFiles()
-    links = searcher.searchIn(args.source_file)
+    links = searcher.searchIn(Path(args.source_file))
     if args.verbose:
         log.debug(links)
     FileSetter.file_transfer(links,

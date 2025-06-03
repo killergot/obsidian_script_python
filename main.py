@@ -1,3 +1,5 @@
+import os
+
 from src.FileClasses.FileSetter import FileSetter
 from src.FileClasses.Searcher import SearcherAllFiles
 from src.lexicon.lexicon import LEXICON_RU
@@ -9,6 +11,7 @@ import logging
 import argparse
 
 if __name__ == '__main__':
+    os.makedirs('./output', exist_ok=True)
     parser = argparse.ArgumentParser(description=LEXICON_RU['/help'])
     parser.add_argument('source_file',
                         help=LEXICON_RU['source_file'])

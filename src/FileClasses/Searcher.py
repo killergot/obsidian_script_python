@@ -28,6 +28,9 @@ class SearcherAllFiles:
         '.gif',  # GIF изображения
         '.bmp',  # BMP изображения
         '.zip',  # ZIP архивы
+        '.7z',
+        '.tar',
+        '.tar.gz',
         '.rar',  # RAR архивы
         '.exe',  # Исполняемые файлы
         '.bat',  # Пакетные файлы

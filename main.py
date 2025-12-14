@@ -32,14 +32,15 @@ if __name__ == '__main__':
                         help=LEXICON_RU['--main_path'], default=None)
     args = parser.parse_args()
 
-
-
-    searcher = SearcherAllFiles()
-    links = searcher.searchIn(Path(args.source_file))
     if args.verbose:
         init_log(logging.DEBUG)
     else:
         init_log(logging.INFO)
+
+
+    searcher = SearcherAllFiles()
+    links = searcher.searchIn(Path(args.source_file))
+
 
     log = logging.getLogger(__name__)
 

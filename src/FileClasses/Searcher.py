@@ -2,6 +2,7 @@ import os
 import re
 from pathlib import Path
 from typing import Optional
+from urllib.parse import unquote
 
 from src.FileClasses.decor import except_catch
 from src.FileClasses.DirectoryWorker import DirectoryWorker
@@ -94,21 +95,98 @@ class SearcherAllFiles:
                     return str(temp.relative_to(self.main_file_path))
         return None
 
-
-    def find_all_links(self, file : str) -> list[str]:
-        """Функция для нахождения всех ссылок в файле
-            Рассматриваются 3 вида ссылок в obsidian:
-            1 - [[link]]
-            2 - [text](link)
-            3 - [text](<link is separated by a space>)
+    def find_all_links(self, file: str) -> list[str]:
         """
-        pattern : str= r"\[\[([^\n\]]+?)\]\]|\[.*?\]\((<([^>\n]+)>|([^()\n<>]+))\)"
-        matches : list[str] = re.findall(pattern, file)
-        results : list[str]= []
-        for match in matches:
-            # Извлекаем только непустые группы (т.е. либо из [[]], либо из ())
-            results.append(match[0] or match[2] or match[3])
-        return self.refactor_path_files(results)
+        Функция для нахождения всех ссылок в файле Obsidian.
+
+        Поддерживаемые форматы:
+        - [[link]]
+        - [[link|display name]]
+        - [[link#section]]
+        - [[link#section|display name]]
+        - [text](link)
+        - [text](link#section)
+        - [text](<link with spaces>)
+        - [text](file%20name%20with%20spaces)
+        """
+
+        patterns: dict[str, re.Pattern] = {
+            # [[filename]] или [[filename|display]] или [[filename#section|display]]
+            'wikilink [[...]]': re.compile(
+                r'''
+                \[\[
+                    (?P<link>[^\]\|#\n]+)   # имя файла (без |, #, ], переноса)
+                    (?:\#[^\]\|\n]*)?       # опциональная секция #section
+                    (?:\|[^\]\n]*)?         # опциональное отображаемое имя |display
+                \]\]
+                ''',
+                re.VERBOSE | re.IGNORECASE
+            ),
+
+            # [text](<link with spaces>)
+            'markdown link <...>': re.compile(
+                r'''
+                \[
+                    [^\]\n]*                # текст ссылки
+                \]
+                \(
+                    <(?P<link>[^>\n]+)>     # ссылка в угловых скобках
+                \)
+                ''',
+                re.VERBOSE | re.IGNORECASE
+            ),
+
+            # [text](link#section) - стандартная markdown ссылка
+            'markdown link (...)': re.compile(
+                r'''
+                \[
+                    [^\]\n]*                # текст ссылки  
+                \]
+                \(
+                    (?P<link>
+                        [^()\n<>\s]+        # путь к файлу (без пробелов)
+                        (?:\#[^\s()]*)?     # опциональный якорь #section
+                    )
+                \)
+                ''',
+                re.VERBOSE | re.IGNORECASE
+            ),
+
+            # [text](file%20name.md) - URL-encoded пробелы
+            'markdown link with %20': re.compile(
+                r'''
+                \[
+                    [^\]\n]*                # текст ссылки
+                \]
+                \(
+                    (?P<link>
+                        [^()\n<>]*          # начало пути
+                        %20                 # минимум один encoded пробел
+                        [^()\n<>]*          # остаток пути
+                    )
+                \)
+                ''',
+                re.VERBOSE | re.IGNORECASE
+            ),
+        }
+
+        results: list[str] = []
+
+        for description, pattern in patterns.items():
+            for match in pattern.finditer(file):
+                link = match.group('link')
+                if link and link not in results:
+                    # Декодируем %20 в пробелы если нужно
+                    decoded_link = unquote(link)
+                    if decoded_link not in results:
+                        results.append(decoded_link)
+        log.info(results)
+
+        temp = self.refactor_path_files(results)
+
+        log.info(temp)
+
+        return temp
 
     @except_catch
     def rec_find_links(self,file_path: str, links: set[str]) -> None:

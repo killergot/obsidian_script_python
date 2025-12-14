@@ -60,7 +60,7 @@ class SearcherAllFiles:
             self.main_file_path = file_path.parent
         else:
             self.main_file_path = main_path
-        DirectoryWorker.pushd(self.main_file_path)
+        log.debug(f'Главный путь для поиска: {self.main_file_path}')
         self.rec_find_links(file_path, res)
         log.debug(f'{file_path = }')
         res.add(file_path.name)
@@ -180,13 +180,14 @@ class SearcherAllFiles:
                     decoded_link = unquote(link)
                     if decoded_link not in results:
                         results.append(decoded_link)
-        log.info(results)
 
-        temp = self.refactor_path_files(results)
+        # Обработка найденных ссылок в файле
+        log.debug(f'Все найденные ссылки: {results}')
+        refactor_results = self.refactor_path_files(results)
+        if refactor_results:
+            log.info(f'Обработанные найденные ссылки: {refactor_results}')
 
-        log.info(temp)
-
-        return temp
+        return refactor_results
 
     @except_catch
     def rec_find_links(self,file_path: str, links: set[str]) -> None:

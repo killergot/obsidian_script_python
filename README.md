@@ -1,8 +1,6 @@
 ﻿
-# Obsidian Script Python
-
+# Obsidian export helper
 ## Как использовать
-
 ### Требования
 - Python 3.10+
 

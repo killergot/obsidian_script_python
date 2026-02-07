@@ -40,7 +40,18 @@ if __name__ == '__main__':
 
 
     searcher = SearcherAllFiles()
-    DirectoryWorker.pushd(Path(args.main_path))
+
+
+
+    if args.main_path is None:
+        main_path = Path(args.source_file).resolve().parent
+    else:
+        main_path = Path(args.main_path)
+
+    assert main_path.is_dir(), LEXICON_RU['main_path_not_dir']
+    DirectoryWorker.pushd(main_path)
+    assert Path.cwd() == main_path, LEXICON_RU["not_set_main_path"]
+
     links = searcher.searchIn(Path(args.source_file))
 
 
@@ -52,3 +63,5 @@ if __name__ == '__main__':
                              args.output,
                              del_flag=args.delete,
                              folder_flag=args.folder)
+    DirectoryWorker.popd()
+    print(LEXICON_RU['OK'])

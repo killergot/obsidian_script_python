@@ -158,6 +158,45 @@ def test_markdown_anchor_links_are_copied(tmp_path: Path) -> None:
     assert (output_dir / "child.md").exists()
 
 
+def test_explicit_attachment_extension_is_copied(tmp_path: Path) -> None:
+    vault = tmp_path / "vault"
+    vault.mkdir()
+    source_file = vault / "index.md"
+    source_file.write_text("![[DeepIpSpy.pcap]]\n", encoding="utf-8")
+    (vault / "DeepIpSpy.pcap").write_bytes(b"pcap data")
+    output_dir = tmp_path / "out"
+
+    repo_root = Path(__file__).resolve().parents[1]
+    result = _run_main(
+        [str(source_file), "-o", str(output_dir), "--vault-path", str(vault)],
+        cwd=repo_root,
+    )
+
+    assert (output_dir / "index.md").exists()
+    assert (output_dir / "DeepIpSpy.pcap").exists()
+    assert "- files: 1" in result.stdout
+    assert "- missing links: 0" in result.stdout
+
+
+def test_wikilink_with_dots_falls_back_to_markdown_note(tmp_path: Path) -> None:
+    vault = tmp_path / "vault"
+    vault.mkdir()
+    source_file = vault / "index.md"
+    source_file.write_text("[[Deep.Ip.Spy]]\n", encoding="utf-8")
+    (vault / "Deep.Ip.Spy.md").write_text("note", encoding="utf-8")
+    output_dir = tmp_path / "out"
+
+    repo_root = Path(__file__).resolve().parents[1]
+    result = _run_main(
+        [str(source_file), "-o", str(output_dir), "--vault-path", str(vault)],
+        cwd=repo_root,
+    )
+
+    assert (output_dir / "index.md").exists()
+    assert (output_dir / "Deep.Ip.Spy.md").exists()
+    assert "- missing links: 0" in result.stdout
+
+
 def test_source_without_suffix_uses_markdown_file(tmp_path: Path) -> None:
     vault, source_file = _create_vault(tmp_path)
     output_dir = tmp_path / "out"
@@ -176,6 +215,7 @@ def test_source_without_suffix_uses_markdown_file(tmp_path: Path) -> None:
 
     assert (output_dir / "note1.md").exists()
     assert "- notes: 2" in result.stdout
+    assert "- files: 1" in result.stdout
     assert "- output: " in result.stdout
 
 
@@ -265,8 +305,10 @@ def test_report_includes_summary_and_missing_links(tmp_path: Path) -> None:
         assert (output_dir / "export-report-report-source.md").exists() is False
         assert "- notes: 1" in result.stdout
         assert "- images: 1" in result.stdout
+        assert "- files: 0" in result.stdout
         assert "- missing links: 1" in result.stdout
         assert "missing.md (linked target is missing)" in report
+        assert "- Files: 0" in report
         assert "image.png" in report
     finally:
         if report_file.exists():

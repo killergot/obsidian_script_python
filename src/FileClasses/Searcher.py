@@ -112,35 +112,41 @@ class SearcherAllFiles:
         decoded_link = unquote(link).strip()
         return decoded_link.split("#", 1)[0]
 
+    @staticmethod
+    def candidate_link_paths(test: str) -> list[str]:
+        candidates = [test]
+        if not test.lower().endswith(".md"):
+            candidates.append(f"{test}.md")
+        return candidates
+
     def set_exist_file(self, test: str) -> str | None:
         """Проверка того, существует ли файл"""
         if self.ignore_matcher is not None:
             existing_file, _ = self.resolve_existing_file(test)
             return existing_file
 
-        if not test.endswith(self.file_extensions):
-            test += ".md"
-        if os.path.exists(test):
-            return test
+        for candidate in self.candidate_link_paths(test):
+            if os.path.exists(candidate):
+                return candidate
         for root, _, _ in os.walk(self.main_file_path):
             if (
                 root.rfind(".git") == -1 and root.rfind(".obsidian") == -1
             ):  # убираем проверку технических папок
-                temp = Path(root).joinpath(test)
-                if temp.exists():
-                    log.debug(temp.relative_to(self.main_file_path))
-                    return str(temp.relative_to(self.main_file_path))
+                for candidate in self.candidate_link_paths(test):
+                    temp = Path(root).joinpath(candidate)
+                    if temp.exists():
+                        log.debug(temp.relative_to(self.main_file_path))
+                        return str(temp.relative_to(self.main_file_path))
         return None
 
     def resolve_existing_file(self, test: str) -> tuple[str | None, bool]:
-        if not test.endswith(self.file_extensions):
-            test += ".md"
-        if os.path.exists(test):
-            existing_file = self._relative_to_main_path(Path(test))
-            if self._is_ignored(existing_file, is_dir=Path(test).is_dir()):
-                self._add_ignored_file(existing_file)
-                return None, True
-            return existing_file, False
+        for candidate in self.candidate_link_paths(test):
+            if os.path.exists(candidate):
+                existing_file = self._relative_to_main_path(Path(candidate))
+                if self._is_ignored(existing_file, is_dir=Path(candidate).is_dir()):
+                    self._add_ignored_file(existing_file)
+                    return None, True
+                return existing_file, False
 
         for root, dirs, _ in os.walk(self.main_file_path):
             dirs[:] = [
@@ -150,14 +156,15 @@ class SearcherAllFiles:
                 and not self._is_ignored(Path(root).joinpath(directory), is_dir=True)
             ]
 
-            temp = Path(root).joinpath(test)
-            if temp.exists():
-                existing_file = self._relative_to_main_path(temp)
-                if self._is_ignored(existing_file, is_dir=temp.is_dir()):
-                    self._add_ignored_file(existing_file)
-                    return None, True
-                log.debug(temp.relative_to(self.main_file_path))
-                return existing_file, False
+            for candidate in self.candidate_link_paths(test):
+                temp = Path(root).joinpath(candidate)
+                if temp.exists():
+                    existing_file = self._relative_to_main_path(temp)
+                    if self._is_ignored(existing_file, is_dir=temp.is_dir()):
+                        self._add_ignored_file(existing_file)
+                        return None, True
+                    log.debug(temp.relative_to(self.main_file_path))
+                    return existing_file, False
         return None, False
 
     def _relative_to_main_path(self, path: Path) -> str:

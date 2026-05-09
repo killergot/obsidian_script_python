@@ -104,10 +104,12 @@ def print_summary(
     images = sum(
         1 for file_name in transferred_files if Path(file_name).suffix.lower() in IMAGE_EXTENSIONS
     )
+    files = len(transferred_files) - notes - images
 
     print("Export complete:")
     print(f"- notes: {notes}")
     print(f"- images: {images}")
+    print(f"- files: {files}")
     print(f"- missing links: {len(missing_links)}")
     print(f"- ignored files: {len(ignored_files)}")
     print(f"- output: {output_path}")
@@ -138,6 +140,7 @@ def write_report(
     images = sum(
         1 for file_name in transferred_files if Path(file_name).suffix.lower() in IMAGE_EXTENSIONS
     )
+    files = len(transferred_files) - notes - images
 
     lines = [
         f"# Export report: {source_file.name}",
@@ -157,6 +160,7 @@ def write_report(
         "",
         f"- Notes: {notes}",
         f"- Images: {images}",
+        f"- Files: {files}",
         f"- Missing links: {len(missing_links)}",
         f"- Ignored files: {len(ignored_files)}",
         f"- Copied files: {len(transfer_result.copied_files)}",
